@@ -6,8 +6,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.management.ImmutableDescriptor;
-
 public class Employee {
 	// All of the roles this employee is in.
 	//	Sorted by their payment priority
@@ -46,5 +44,14 @@ public class Employee {
 	//	The returned set is immutable
 	public Set<Role> getRoles() {
 		return Collections.unmodifiableSortedSet(roles);
+	}
+
+	// Get the hours this employee worked
+	public PayHours getHours() {
+		return hours;
+	}
+
+	public String getName() {
+		return name;
 	}
 }
