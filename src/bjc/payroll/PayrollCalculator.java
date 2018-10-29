@@ -3,7 +3,6 @@ package bjc.payroll;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.Consumer;
 
 // Calculate payroll for employees
 public class PayrollCalculator {
@@ -24,7 +23,7 @@ public class PayrollCalculator {
 		// It's assumed the highest priority role gives the base pay
 
 		// The current total
-		FloatHolder amt = new FloatHolder(0);
+		float amt = 0;
 
 		Iterator<Role> roleIt = e.getRoles().iterator();
 
@@ -33,46 +32,42 @@ public class PayrollCalculator {
 
 		// Calculate base pay
 		Role base = roleIt.next();
-		amt.addToFloat(base.calculate(e, lpl, amt.getFloat()));
+		amt += base.calculate(e, lpl, amt);
 		System.out.println(base.description() + "\t\t" + amt);
 
 		// Add a payline to the map
-		lpl.put(base.getPriority(), new PayLine(amt.getFloat(), true, base.description()));
+		lpl.put(base.getPriority(), new PayLine(amt, true, base.description()));
 
-		// Handle the rest of the roles
-		roleIt.forEachRemaining(new Consumer<Role>() {
+		for (Role r : roleIt) {
+			// Calculate the role first
+			float am = r.calculate(e, lpl, amt.getFloat());
 
-			@Override
-			public void accept(Role r) {
-				// Calculate the role first
-				float am = r.calculate(e, lpl, amt.getFloat());
-
-				// Only do stuff if its non-zero
-				if (am != 0) {
-					// Handle non-totaling roles
-					if (r.isNonTotaling()) {
-						System.out.println("* " + r.description() + 
-								"\t\t" + am);
-					} else {
-						System.out.println(r.description() + 
-								"\t\t" + amt.addToFloat(am));
-					}
+			// Only do stuff if its non-zero
+			if (am != 0) {
+				// Handle non-totaling roles
+				if (r.isNonTotaling()) {
+					System.out.println("* " + r.description() + 
+							"\t\t" + am);
+				} else {
+					amt += am;
 					
-					// Add the role to the list
-					lpl.put(r.getPriority(), 
-							new PayLine(amt.getFloat(), r.isNonTotaling(),
-									r.description()));
-
+					System.out.println(r.description() + 
+							"\t\t" + amt);
 				}
-			}
 
-		});
+				// Add the role to the list
+				lpl.put(r.getPriority(), 
+						new PayLine(amt, r.isNonTotaling(),
+								r.description()));
+
+			}
+		}
 		
 
 		// Print a spacer
 		System.out.println("--------------------------------------------");
 		
 		// Print out the total
-		System.out.println("Total: \t\t" + amt.getFloat());
+		System.out.println("Total: \t\t" + amt);
 	}
 }
